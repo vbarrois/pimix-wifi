@@ -1,14 +1,13 @@
 package main;
 
 import java.net.SocketException;
-import java.net.UnknownHostException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import utils.GetNetworkAddress;
 import websocket.WSClient;
 import wifi.WIFIScanner;
+import wifi.WPASupplicant;
 
 public class PiWifiScan {
 
@@ -17,6 +16,7 @@ public class PiWifiScan {
 	public static Config o_configuration;
 	private static WSClient o_wsclient; 
 	private static WIFIScanner o_scanner = new WIFIScanner(); 
+	public static WPASupplicant o_wpa = new WPASupplicant();
 	
 	public static void main(String[] args)
 	{
@@ -41,6 +41,8 @@ public class PiWifiScan {
 			log.error("EXIT APPLICATION");
 			System.exit(0);
 		}
+		
+		o_wpa.analyze();
 			
 		o_wsclient = new WSClient( o_configuration.getRouterAddress(), o_configuration.getRouterPort(), id);
 		if( o_wsclient.isInitialized() ) {

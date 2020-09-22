@@ -22,13 +22,16 @@ public class WifiNetwork {
 	protected String sESSID = "";
 	protected boolean bEncryption = false;
 	
-	private String sSSID = "";
-	private String sKey = "";
+	protected WPANetwork wpa;
 	
 	public WifiNetwork () {}
 	
 	public String toString () {
 		return sESSID;
+	}
+	
+	public void setWPA (WPANetwork _wpa) {
+		wpa = _wpa;
 	}
 	
 	public void addCfgLine (String _line) {
@@ -42,7 +45,7 @@ public class WifiNetwork {
 	}
 	
 	public String getSSID () {
-		return sSSID;
+		return sESSID;
 	}
 	
 	private void checkCellAddress (String _line) {
@@ -115,7 +118,7 @@ public class WifiNetwork {
 			network.put("signal", iSignalLevel);
 			network.put("encryption", bEncryption);
 			network.put("ssid", sESSID);
-			network.put("key", sKey);
+			network.put("wpa", (wpa != null));
 		} catch (JSONException e) {
 			log.error("Cannot export wifi network as JSON "+ e.getMessage());
 		}

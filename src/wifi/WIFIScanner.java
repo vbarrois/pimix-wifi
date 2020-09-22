@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +30,7 @@ public class WIFIScanner implements WSClientListener {
 
 	private transient ArrayList<WIFIListener> listeners;
 	
-	private ArrayList<WifiNetwork> networks = new ArrayList<WifiNetwork>();
+	private Hashtable<String, WifiNetwork> networks = new Hashtable<String, WifiNetwork>();
 	private String sConnectedESSID = "";
 	
 	public WIFIScanner () {
@@ -60,7 +61,7 @@ public class WIFIScanner implements WSClientListener {
 	        reader = new BufferedReader(new InputStreamReader(p.getInputStream()));	
 	    	}
         
-	    	networks = parseContent(reader);
+	    	parseContent(reader);
 	    } catch (IOException e) {
 	    }
 	}
@@ -98,37 +99,43 @@ public class WIFIScanner implements WSClientListener {
 		System.out.println(_ident);
 	}
 	
-	private static ArrayList<WifiNetwork> parseContent (BufferedReader br) {
-		ArrayList<WifiNetwork> networkList = new ArrayList<WifiNetwork>();
-
+	private void parseContent (BufferedReader br) {
 		String line;
         try {
 			WifiNetwork last = null;
         	while ((line = br.readLine()) != null) {
 				boolean isNewNetwork = isNewNetwork(line);
 				if (isNewNetwork) {
-					if (last != null) networkList.add(last);
+					if (last != null) addNetwork(last);
 					last = new WifiNetwork();
 				}
 				if (last != null) last.addCfgLine(line);
 			}
+        	if (last != null) addNetwork(last);
 		} catch (IOException e) {
 			log.error("Cannot parse wifi networks");
 		}
-        return networkList;
+	}
+	
+	private void addNetwork(WifiNetwork _network) {
+		WPANetwork wpa = PiWifiScan.o_wpa.getFromSSID(_network.getSSID());
+		if (wpa != null) {
+			_network.setWPA(wpa);
+		}
+		networks.put(_network.getSSID(), _network);
 	}
 	
 	private static boolean isNewNetwork(String _line) {
 		Pattern pattern = Pattern.compile("Cell", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(_line);
-	    return matcher.find();
+		return matcher.find();
 	}
 	
 	private JSONObject getJSONInterface() {
 		JSONObject networkinterface = new JSONObject();
 		try {
 			JSONArray list = new JSONArray();
-			for( WifiNetwork net : networks ) {
+			for( WifiNetwork net : networks.values() ) {
 				list.put(net.getJSON());
 			}
 			networkinterface.put("interface", PiWifiScan.o_configuration.getWLANInterface());
@@ -156,7 +163,6 @@ public class WIFIScanner implements WSClientListener {
 			default:
 				break;
 		}
-		
 	}
 
 	@Override

@@ -14,12 +14,14 @@ public class Config
 	private static final String KEY_ROUTERADDRESS	= "router_address";
 	private static final String KEY_ROUTERPORT		= "router_port";
 	private static final String KEY_WLANINTERFACE	= "wlan_interface";
-	private static final String KEY_DEBUGMODE		= "debug";
+	private static final String KEY_WPASUPPLICANT	= "wpa_conf";
+	private static final String KEY_DEBUGMODE			= "debug";
 	
 	private static Config _instance 	= null;
-	private String _router_address		= "pimix-router";
+	private String _router_address	= "pimix-router";
 	private int	_router_port			= 82;
-	private String _wlan_interface		= "wlan0";
+	private String _wlan_interface	= "wlan0";
+	private String _wpa_supplicant	= "/etc/wpa_supplicant/wpa_supplicant.conf";
 	private boolean _debug_mode 		= false;
 
 	private Config(){}
@@ -51,7 +53,11 @@ public class Config
 		if (_config.get(KEY_ROUTERADDRESS) != null) setRouterAddress(_config.get(KEY_ROUTERADDRESS));
 		
 		if (_config.get(KEY_ROUTERPORT) != null) setRouterPort(_config.getInt(KEY_ROUTERPORT));
+		
+		if (_config.get(KEY_WLANINTERFACE) != null) setWLANInterface(_config.get(KEY_WLANINTERFACE));
 
+		if (_config.get(KEY_WPASUPPLICANT) != null) setWPASupplicant(_config.get(KEY_WPASUPPLICANT));
+		
 		if (_config.get(KEY_DEBUGMODE) == null) _config.add(KEY_DEBUGMODE, _debug_mode);
 		setDebugMode(_config.getBoolean(KEY_DEBUGMODE));
 	}
@@ -95,9 +101,17 @@ public class Config
 	public void setWLANInterface(String _interface) {
 		if(_interface != null && _interface.length() > 0) _wlan_interface = _interface;
 	}
-
+	
 	public String getWLANInterface() {
 		return _wlan_interface;
+	}
+	
+	public void setWPASupplicant(String _file) {
+		if(_file != null && _file.length() > 0) _wpa_supplicant = _file;
+	}
+	
+	public String getWPASupplicant() {
+		return _wpa_supplicant;
 	}
 	
 	public void setRouterPort(int _port) {
